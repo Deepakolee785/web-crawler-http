@@ -1,0 +1,30 @@
+{
+  "name": "web-crawler-http",
+  "version": "1.0.0",
+  "description": "Website crawler in Node and Typescript",
+  "private": false,
+  "homepage": "https://github.com/Deepakolee785/web-crawler-http#readme",
+  "keywords": [
+    "crawler",
+    "javascript http crawler",
+    "typescript crawler",
+    "web crawler",
+    "http website crawler"
+  ],
+  "author": "Deepak Oli",
+  "license": "ISC",
+  "main": "src/main.ts",
+  "scripts": {
+    "start": "ts-node src/main.ts",
+    "test": "jest"
+  },
+  "devDependencies": {
+    "@types/jsdom": "^21.1.1",
+    "jest": "^29.5.0",
+    "ts-node": "^10.9.1",
+    "typescript": "^5.1.3"
+  },
+  "dependencies": {
+    "jsdom": "^22.1.0"
+  }
+}
