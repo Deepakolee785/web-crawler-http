@@ -40,7 +40,7 @@ describe('Get URLs from HTML Test', () => {
       </body>
     </html>
     `
-    const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL)
+    const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL).urls
     const expected = ['https://someurl.com/blog']
     expect(actual).toEqual(expected)
   })
@@ -54,7 +54,7 @@ describe('Get URLs from HTML Test', () => {
       </body>
     </html>
     `
-    const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL)
+    const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL).urls
     const expected = ['https://someurl.com/blog/']
     expect(actual).toEqual(expected)
   })
@@ -68,7 +68,7 @@ describe('Get URLs from HTML Test', () => {
       </body>
     </html>
     `
-    const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL)
+    const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL).urls
     const expected: string[] = []
     expect(actual).toEqual(expect.arrayContaining(expected))
   })
@@ -89,7 +89,7 @@ describe('Get URLs from HTML Test', () => {
       </body>
     </html>
     `
-    const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL)
+    const actual = getURLsFromHTML(inputHTMLBody, inputBaseURL).urls
     const expected = ['https://someurl.com/home/', 'https://someurl.com/blog']
     expect(actual).toEqual(expect.arrayContaining(expected))
   })
