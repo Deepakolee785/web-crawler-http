@@ -1,4 +1,5 @@
 import { MetaDescriptions, MetaKeywords, MetaTitles, PagesType } from '../types'
+import { exportReport } from './excelReport'
 
 function sortPages(pages: PagesType) {
   const pageArr = Object.entries(pages)
@@ -40,6 +41,13 @@ function printReport(
   console.log('Titles: ', [...uniqueTitles])
   console.log('Descriptions: ', [...uniqueDescriptions])
   console.log('Keywords: ', [...uniqueKeywords])
+
+  exportReport({
+    pages,
+    titles: [...uniqueTitles] as string[],
+    descriptions: [...uniqueDescriptions] as string[],
+    keywords: [...uniqueKeywords] as string[],
+  })
 
   console.log('==========\nEnd Report\n==========')
 }

@@ -52,11 +52,6 @@ async function crawlPage({ baseURL, currentURL, pages, data }: CrawlPageArgs) {
     }
     const htmlBody = await resp.text()
     const data = getURLsFromHTML(htmlBody, baseURL)
-    // newData.push({
-    //   metaTitles: data.metaTitles,
-    //   metaDescriptions: data.metaDescriptions,
-    //   metaKeywords: data.metaKeywords,
-    // })
     newData.metaTitles.push(...data.metaTitles)
     newData.metaDescriptions.push(...data.metaDescriptions)
     newData.metaKeywords.push(...data.metaKeywords)
