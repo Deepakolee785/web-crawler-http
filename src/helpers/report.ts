@@ -1,12 +1,8 @@
 import { Page } from '../types'
 import { exportReport } from './excelReport'
 
-function sortPages(pages: Page[]) {
-  const tempPages = structuredClone(pages)
-  tempPages.sort((a, b) => {
-    return b.hits - a.hits
-  })
-  return tempPages
+function sortPages(pages: Page[]): Page[] {
+  return [...pages].sort((a, b) => b.hits - a.hits)
 }
 
 function printReport(pages: Page[]) {
@@ -14,40 +10,39 @@ function printReport(pages: Page[]) {
   const sortedPages = sortPages(pages)
   const titles = new Set<string>()
   const descriptions = new Set<string>()
-  const keywordList = new Set<string>()
+  const keywords = new Set<string>()
+
   for (const page of sortedPages) {
-    console.log(`Found ${page.hits} links to page: ${page.url}`)
-    const title =
-      page.titles.og_title ||
-      page.titles.title ||
-      page.titles.twitter_title ||
-      page.titles.item_title
-    title && titles.add(title)
+    const { og_title, title, twitter_title, item_title } = page.titles
+    const pageTitle = og_title || title || twitter_title || item_title
+    if (pageTitle) titles.add(pageTitle)
 
-    const description =
-      page.descriptions.og_description ||
-      page.descriptions.description ||
-      page.descriptions.twitter_description ||
-      page.descriptions.item_description
-    description && descriptions.add(description)
-    console.log(page.keywords)
+    const {
+      og_description,
+      description,
+      twitter_description,
+      item_description,
+    } = page.descriptions
+    const pageDescription =
+      og_description || description || twitter_description || item_description
+    if (pageDescription) descriptions.add(pageDescription)
 
-    const keywords = (typeof page.keywords === 'object' ? '' : page.keywords)
-      ?.split(',')
-      ?.filter(Boolean)
-    keywords?.length && keywords.forEach((keyword) => keywordList.add(keyword))
+    if (typeof page.keywords === 'string') {
+      const pageKeywords = page.keywords.split(',').filter(Boolean)
+      pageKeywords.forEach((keyword) => keywords.add(keyword))
+    }
   }
-  console.log('==========\nSummary\n==========')
 
-  console.log('Titles: ', [...titles])
-  console.log('Descriptions: ', [...descriptions])
-  console.log('Keywords: ', [...keywordList])
+  console.log('==========\nSummary\n==========')
+  console.log('Titles:', Array.from(titles))
+  console.log('Descriptions:', Array.from(descriptions))
+  console.log('Keywords:', Array.from(keywords))
 
   exportReport({
     pages: sortedPages,
-    titles: [...titles],
-    descriptions: [...descriptions],
-    keywords: [...descriptions],
+    titles: Array.from(titles),
+    descriptions: Array.from(descriptions),
+    keywords: Array.from(keywords),
   })
 
   console.log('==========\nEnd Report\n==========')

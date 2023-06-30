@@ -6,7 +6,7 @@ function normalizeURL(urlString: string) {
   const hostPath = `${urlObj.hostname}${urlObj.pathname}`
 
   // Remove trailing slash if it exists
-  if (hostPath.length && hostPath.at(-1) === '/') {
+  if (hostPath.endsWith('/')) {
     return hostPath.slice(0, -1)
   }
   return hostPath
@@ -20,53 +20,46 @@ function parseURL(urlString: string) {
   }
 }
 
-const getContentFromProperty = (
+export const getMetaTagContent = (
   document: Document,
-  property: `${string}="${string}"`
-) => {
-  return document.querySelector(`meta[${property}]`)?.getAttribute('content')
+  selector: string
+): string | undefined | null => {
+  const element = document.querySelector(selector)
+  return element?.getAttribute('content')
 }
 
 export const getTitleFromDocument = (document: Document): MetaTitles => {
   const title = document.querySelector('title')?.text
-  const og_title = document
-    .querySelector('meta[property="og:title"]')
-    ?.getAttribute('content')
-  const twitter_title = document
-    .querySelector('meta[name="twitter:title"]')
-    ?.getAttribute('content')
-  const item_title = document
-    .querySelector('meta[itemprop="name"]')
-    ?.getAttribute('content')
 
-  return { title, twitter_title, og_title, item_title }
-}
-
-const getDescriptionFromDocument = (document: Document): MetaDescriptions => {
-  const description = document
-    .querySelector('meta[name="description"]')
-    ?.getAttribute('content')
-  const og_description = document
-    .querySelector('meta[property="og:description"]')
-    ?.getAttribute('content')
-  const twitter_description = document
-    .querySelector('meta[name="twitter:description"]')
-    ?.getAttribute('content')
-  const item_description = document
-    .querySelector('meta[itemprop="description"]')
-    ?.getAttribute('content')
   return {
-    description,
-    og_description,
-    twitter_description,
-    item_description,
+    title,
+    og_title: getMetaTagContent(document, 'meta[property="og:title"]'),
+    twitter_title: getMetaTagContent(document, 'meta[name="twitter:title"]'),
+    item_title: getMetaTagContent(document, 'meta[itemprop="name"]'),
   }
 }
-function getMetaKeywords(document: Document): MetaKeywords {
-  const keywords = document
-    .querySelector('meta[name="keywords"]')
-    ?.getAttribute('content')
-  return keywords
+
+export const getDescriptionFromDocument = (
+  document: Document
+): MetaDescriptions => {
+  return {
+    description: getMetaTagContent(document, 'meta[name="description"]'),
+    og_description: getMetaTagContent(
+      document,
+      'meta[property="og:description"]'
+    ),
+    twitter_description: getMetaTagContent(
+      document,
+      'meta[name="twitter:description"]'
+    ),
+    item_description: getMetaTagContent(
+      document,
+      'meta[itemprop="description"]'
+    ),
+  }
+}
+export const getMetaKeywords = (document: Document): MetaKeywords => {
+  return getMetaTagContent(document, 'meta[name="keywords"]')
 }
 
 function getURLsFromHTML(
@@ -85,13 +78,12 @@ function getURLsFromHTML(
 
   for (const anchorTag of anchorTags) {
     const url = anchorTag.href
-    let urlObj
+    // check relative urls
+    let urlObj = parseURL(url.startsWith('/') ? `${baseURL}${url}` : url)
 
-    // For relative urls
-    if (url.startsWith('/')) urlObj = parseURL(`${baseURL}${url}`)
-    else urlObj = parseURL(url)
-
-    urlObj && urls.add(urlObj.href)
+    if (urlObj) {
+      urls.add(urlObj.href)
+    }
   }
 
   const titles = getTitleFromDocument(dom.window.document)
@@ -99,7 +91,7 @@ function getURLsFromHTML(
   const keywords = getMetaKeywords(dom.window.document)
 
   return {
-    urls: [...urls],
+    urls: Array.from(urls),
     metaTitles: titles,
     metaDescriptions: descriptions,
     metaKeywords: keywords,

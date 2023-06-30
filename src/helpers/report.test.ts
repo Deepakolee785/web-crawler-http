@@ -1,33 +1,193 @@
-import { sortPages } from './report'
+import { Page } from '../types'
+import { sortPages, printReport } from './report'
 
-describe('Report helper test', () => {
-  it('sortPages', () => {
-    const input = { 'https://someurl.com/path': 1, 'https://someurl.com': 3 }
-    const actual = sortPages(input)
-    const expected = [
-      ['https://someurl.com', 3],
-      ['https://someurl.com/path', 1],
+jest.mock('./excelReport', () => ({
+  exportReport: jest.fn(),
+}))
+
+import { exportReport } from './excelReport'
+
+describe('sortPages', () => {
+  it('should sort pages in descending order based on hits', () => {
+    const pages: Page[] = [
+      {
+        url: 'page1',
+        hits: 5,
+        titles: {
+          title: '',
+          twitter_title: '',
+          og_title: '',
+          item_title: '',
+        },
+        descriptions: {
+          description: '',
+          og_description: '',
+          twitter_description: '',
+          item_description: '',
+        },
+        keywords: '',
+        time: 0,
+        status: 200,
+        contentType: 'text/html',
+      },
+      {
+        url: 'page2',
+        hits: 3,
+        titles: {
+          title: '',
+          twitter_title: '',
+          og_title: '',
+          item_title: '',
+        },
+        descriptions: {
+          description: '',
+          og_description: '',
+          twitter_description: '',
+          item_description: '',
+        },
+        keywords: '',
+        time: 0,
+        status: 200,
+        contentType: 'text/html',
+      },
+      {
+        url: 'page3',
+        hits: 8,
+        titles: {
+          title: '',
+          twitter_title: '',
+          og_title: '',
+          item_title: '',
+        },
+        descriptions: {
+          description: '',
+          og_description: '',
+          twitter_description: '',
+          item_description: '',
+        },
+        keywords: '',
+        time: 0,
+        status: 200,
+        contentType: 'text/html',
+      },
     ]
-    expect(actual).toEqual(expect.arrayContaining(expected))
+
+    const sortedPages = sortPages(pages)
+
+    expect(sortedPages).toEqual([
+      {
+        url: 'page3',
+        hits: 8,
+        titles: {
+          title: '',
+          twitter_title: '',
+          og_title: '',
+          item_title: '',
+        },
+        descriptions: {
+          description: '',
+          og_description: '',
+          twitter_description: '',
+          item_description: '',
+        },
+        keywords: '',
+        time: 0,
+        status: 200,
+        contentType: 'text/html',
+      },
+      {
+        url: 'page1',
+        hits: 5,
+        titles: {
+          title: '',
+          twitter_title: '',
+          og_title: '',
+          item_title: '',
+        },
+        descriptions: {
+          description: '',
+          og_description: '',
+          twitter_description: '',
+          item_description: '',
+        },
+        keywords: '',
+        time: 0,
+        status: 200,
+        contentType: 'text/html',
+      },
+      {
+        url: 'page2',
+        hits: 3,
+        titles: {
+          title: '',
+          twitter_title: '',
+          og_title: '',
+          item_title: '',
+        },
+        descriptions: {
+          description: '',
+          og_description: '',
+          twitter_description: '',
+          item_description: '',
+        },
+        keywords: '',
+        time: 0,
+        status: 200,
+        contentType: 'text/html',
+      },
+    ])
   })
-  it('sortPages many pages', () => {
-    const input = {
-      'https://someurl.com/path': 3,
-      'https://someurl.com': 8,
-      'https://someurl.com/home': 30,
-      'https://someurl.com/contact': 2,
-      'https://someurl.com/about': 1,
-      'https://someurl.com/goal': 12,
-    }
-    const actual = sortPages(input)
-    const expected = [
-      ['https://someurl.com/home', 30],
-      ['https://someurl.com/goal', 12],
-      ['https://someurl.com', 8],
-      ['https://someurl.com/path', 3],
-      ['https://someurl.com/contact', 2],
-      ['https://someurl.com/about', 1],
-    ]
-    expect(actual).toEqual(expect.arrayContaining(expected))
+
+  it('should return an empty array if pages is empty', () => {
+    const pages: Page[] = []
+    const sortedPages = sortPages(pages)
+
+    expect(sortedPages).toEqual([])
   })
+})
+
+// Mock the console.log function
+const consoleLogMock = jest.spyOn(console, 'log').mockImplementation()
+
+// Mock the exportReport function
+jest.mock('./excelReport', () => ({
+  exportReport: jest.fn(),
+}))
+
+describe('printReport', () => {
+  afterEach(() => {
+    jest.clearAllMocks()
+  })
+
+  it('should handle empty pages array', () => {
+    const pages: Page[] = []
+
+    printReport(pages)
+
+    expect(consoleLogMock).toHaveBeenCalledWith(
+      '==========\nReport\n=========='
+    )
+    expect(consoleLogMock).toHaveBeenCalledWith(
+      '==========\nSummary\n=========='
+    )
+    expect(consoleLogMock).toHaveBeenCalledWith('Titles:', [])
+    expect(consoleLogMock).toHaveBeenCalledWith('Descriptions:', [])
+    expect(consoleLogMock).toHaveBeenCalledWith('Keywords:', [])
+    expect(consoleLogMock).toHaveBeenCalledWith(
+      '==========\nEnd Report\n=========='
+    )
+
+    const { exportReport } = require('./excelReport') // Import the mock
+    expect(exportReport).toHaveBeenCalledWith({
+      pages: [],
+      titles: [],
+      descriptions: [],
+      keywords: [],
+    })
+  })
+})
+
+// Restore the original console.log function
+afterAll(() => {
+  consoleLogMock.mockRestore()
 })

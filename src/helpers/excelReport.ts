@@ -2,6 +2,8 @@ import Excel from 'exceljs'
 import path from 'path'
 import { Page } from '../types'
 
+const EXPORT_PATH = path.resolve(__dirname, '../..', 'report/report.xlsx')
+
 export const exportReport = async (data: {
   pages: Page[]
   titles: string[]
@@ -9,20 +11,31 @@ export const exportReport = async (data: {
   keywords: string[]
 }) => {
   const workbook = new Excel.Workbook()
-  const worksheet = workbook.addWorksheet('Hits')
+  const sheetOptions = {
+    font: { size: 12 },
+    width: 150,
+  }
 
-  worksheet.columns = [
-    { key: 'url', header: 'URL', width: 50 },
-    { key: 'hits', header: 'Hits', width: 10 },
-    { key: 'status', header: 'Status', width: 10 },
-    { key: 'time', header: 'Time taken(s)', width: 10 },
-    { key: 'contentType', header: 'Content Type', width: 15 },
-    { key: 'title', header: 'Title', width: 50 },
-    { key: 'description', header: 'Description', width: 50 },
-    { key: 'keywords', header: 'Keywords', width: 50 },
-  ]
+  const createWorksheet = (name: string, header: string) => {
+    const worksheet = workbook.addWorksheet(name)
+    worksheet.columns = [{ key: header, header }]
+    worksheet.columns.forEach((sheetColumn) => {
+      sheetColumn.font = sheetOptions.font
+      sheetColumn.width = sheetOptions.width
+    })
+    worksheet.getRow(1).font = { bold: true, size: 13 }
+    return worksheet
+  }
+
+  const addRowsToWorksheet = (worksheet: Excel.Worksheet, values: string[]) => {
+    values.forEach((value) => {
+      worksheet.addRow({ [worksheet.columns[0].key as string]: value })
+    })
+  }
+
+  const hitsWorksheet = createWorksheet('Hits', 'URL')
   data.pages.forEach((page) => {
-    worksheet.addRow({
+    hitsWorksheet.addRow({
       url: page.url,
       hits: page.hits,
       title: page.titles,
@@ -34,74 +47,17 @@ export const exportReport = async (data: {
     })
   })
 
-  worksheet.columns.forEach((sheetColumn) => {
-    sheetColumn.font = {
-      size: 12,
-    }
-    // sheetColumn.width = 40
-  })
+  const titleWorksheet = createWorksheet('Titles', 'Titles')
+  addRowsToWorksheet(titleWorksheet, data.titles)
 
-  worksheet.getRow(1).font = {
-    bold: true,
-    size: 13,
+  const descriptionWorksheet = createWorksheet('Descriptions', 'Descriptions')
+  addRowsToWorksheet(descriptionWorksheet, data.descriptions)
+
+  const keywordsWorksheet = createWorksheet('Keywords', 'Keywords')
+  addRowsToWorksheet(keywordsWorksheet, data.keywords)
+  try {
+    await workbook.xlsx.writeFile(EXPORT_PATH)
+  } catch (error) {
+    console.error('An error occurred during the export:', error)
   }
-
-  const title_worksheet = workbook.addWorksheet('Titles')
-  title_worksheet.columns = [{ key: 'title', header: 'Titles' }]
-  data.titles.forEach((title) => {
-    title_worksheet.addRow({ title })
-  })
-
-  title_worksheet.columns.forEach((sheetColumn) => {
-    sheetColumn.font = {
-      size: 12,
-    }
-    sheetColumn.width = 150
-  })
-
-  title_worksheet.getRow(1).font = {
-    bold: true,
-    size: 13,
-  }
-
-  const description_worksheet = workbook.addWorksheet('Descriptions')
-  description_worksheet.columns = [
-    { key: 'description', header: 'Descriptions' },
-  ]
-  data.descriptions.forEach((description) => {
-    description_worksheet.addRow({ description })
-  })
-  description_worksheet.columns.forEach((sheetColumn) => {
-    sheetColumn.font = {
-      size: 12,
-    }
-    sheetColumn.width = 150
-  })
-
-  description_worksheet.getRow(1).font = {
-    bold: true,
-    size: 13,
-  }
-
-  const keywords_worksheet = workbook.addWorksheet('Keywords')
-  keywords_worksheet.columns = [{ key: 'keywords', header: 'Keywords' }]
-  data.keywords.forEach((keywords) => {
-    keywords_worksheet.addRow({ keywords })
-  })
-
-  keywords_worksheet.columns.forEach((sheetColumn) => {
-    sheetColumn.font = {
-      size: 12,
-    }
-    sheetColumn.width = 150
-  })
-
-  keywords_worksheet.getRow(1).font = {
-    bold: true,
-    size: 13,
-  }
-
-  const exportPath = path.resolve(__dirname, 'report.xlsx')
-
-  await workbook.xlsx.writeFile(exportPath)
 }
