@@ -74,15 +74,11 @@ function getURLsFromHTML(
   baseURL: string
 ): {
   urls: string[]
-  metaTitles: MetaTitles[]
-  metaDescriptions: MetaDescriptions[]
-  metaKeywords: MetaKeywords[]
+  metaTitles: MetaTitles
+  metaDescriptions: MetaDescriptions
+  metaKeywords: MetaKeywords
 } {
   const urls = new Set<string>([])
-  const metaTitles: MetaTitles[] = []
-  const metaDescriptions: MetaDescriptions[] = []
-  const metaKeywords: MetaKeywords[] = []
-
   const dom = new JSDOM(htmlBody)
   const anchorTags: NodeListOf<HTMLAnchorElement> =
     dom.window.document.querySelectorAll('a')
@@ -102,11 +98,12 @@ function getURLsFromHTML(
   const descriptions = getDescriptionFromDocument(dom.window.document)
   const keywords = getMetaKeywords(dom.window.document)
 
-  metaTitles.push(titles)
-  metaDescriptions.push(descriptions)
-  metaKeywords.push(keywords)
-
-  return { urls: [...urls], metaTitles, metaDescriptions, metaKeywords }
+  return {
+    urls: [...urls],
+    metaTitles: titles,
+    metaDescriptions: descriptions,
+    metaKeywords: keywords,
+  }
 }
 
 export { normalizeURL, getURLsFromHTML }

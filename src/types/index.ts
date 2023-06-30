@@ -1,4 +1,13 @@
-export type PagesType = Record<string, number>
+export type Page = {
+  url: string
+  hits: number
+  titles: MetaTitles
+  descriptions: MetaDescriptions
+  keywords: MetaKeywords
+  time: number
+  status: number
+  contentType: string
+}
 
 export type MetaTitles = {
   title: string | undefined

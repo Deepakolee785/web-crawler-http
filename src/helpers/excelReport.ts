@@ -1,9 +1,9 @@
 import Excel from 'exceljs'
 import path from 'path'
-import { PagesType } from '../types'
+import { Page } from '../types'
 
 export const exportReport = async (data: {
-  pages: PagesType
+  pages: Page[]
   titles: string[]
   descriptions: string[]
   keywords: string[]
@@ -12,13 +12,25 @@ export const exportReport = async (data: {
   const worksheet = workbook.addWorksheet('Hits')
 
   worksheet.columns = [
-    { key: 'url', header: 'URL' },
-    { key: 'hits', header: 'Hits' },
+    { key: 'url', header: 'URL', width: 50 },
+    { key: 'hits', header: 'Hits', width: 10 },
+    { key: 'status', header: 'Status', width: 10 },
+    { key: 'time', header: 'Time taken(s)', width: 10 },
+    { key: 'contentType', header: 'Content Type', width: 15 },
+    { key: 'title', header: 'Title', width: 50 },
+    { key: 'description', header: 'Description', width: 50 },
+    { key: 'keywords', header: 'Keywords', width: 50 },
   ]
-  Object.entries(data.pages).forEach((item) => {
+  data.pages.forEach((page) => {
     worksheet.addRow({
-      url: item[0],
-      hits: item[1],
+      url: page.url,
+      hits: page.hits,
+      title: page.titles,
+      description: page.descriptions,
+      keywords: page.keywords,
+      status: page.status,
+      time: page.time,
+      contentType: page.contentType,
     })
   })
 
@@ -26,7 +38,7 @@ export const exportReport = async (data: {
     sheetColumn.font = {
       size: 12,
     }
-    sheetColumn.width = 55
+    // sheetColumn.width = 40
   })
 
   worksheet.getRow(1).font = {

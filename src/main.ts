@@ -14,24 +14,15 @@ async function main() {
   const baseURL = process.argv[2]
 
   console.log(`Starting crawl of ${baseURL}`)
+
   const pages = await crawlPage({
     baseURL,
     currentURL: baseURL,
-    pages: {},
-    data: {
-      metaTitles: [],
-      metaDescriptions: [],
-      metaKeywords: [],
-    },
+    pages: [],
   })
-  // console.log(pages.data.metaTitles[0])
+  console.log(pages[5])
 
-  printReport(
-    pages.pages,
-    pages.data.metaTitles,
-    pages.data.metaDescriptions,
-    pages.data.metaKeywords
-  )
+  printReport(pages)
   // pnpm dev https://wagslane.dev
 }
 main()
